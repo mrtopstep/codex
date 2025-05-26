@@ -21,6 +21,13 @@ import os
 import warnings
 warnings.filterwarnings('ignore')
 
+# Configure simple logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Import our data loader
 from war_data_loader import WarDataLoader
 
@@ -52,12 +59,12 @@ class AutomaticWarPredictionSystem:
         self.data = None
         self.predictions = None
         
-        print("="*80)
-        print("AUTOMATIC WAR PREDICTION SYSTEM")
-        print("="*80)
-        print(f"Started at: {self.timestamp}")
-        print(f"Results will be saved to: {self.results_dir}/")
-        print("="*80)
+        logger.info("="*80)
+        logger.info("AUTOMATIC WAR PREDICTION SYSTEM")
+        logger.info("="*80)
+        logger.info(f"Started at: {self.timestamp}")
+        logger.info(f"Results will be saved to: {self.results_dir}/")
+        logger.info("="*80)
         
         if auto_run:
             self.run_complete_pipeline()
@@ -66,48 +73,48 @@ class AutomaticWarPredictionSystem:
         """Run the complete prediction pipeline automatically"""
         try:
             # Step 1: Load data
-            print("\nSTEP 1: LOADING DATA FROM INTERNET SOURCES")
-            print("-" * 60)
+            logger.info("\nSTEP 1: LOADING DATA FROM INTERNET SOURCES")
+            logger.info("-" * 60)
             self.load_data()
             
             # Step 2: Process data
-            print("\nSTEP 2: PROCESSING AND ENGINEERING FEATURES")
-            print("-" * 60)
+            logger.info("\nSTEP 2: PROCESSING AND ENGINEERING FEATURES")
+            logger.info("-" * 60)
             self.process_data()
             
             # Step 3: Train models
-            print("\nSTEP 3: TRAINING PREDICTION MODELS")
-            print("-" * 60)
+            logger.info("\nSTEP 3: TRAINING PREDICTION MODELS")
+            logger.info("-" * 60)
             self.train_models()
             
             # Step 4: Make predictions
-            print("\nSTEP 4: GENERATING PREDICTIONS")
-            print("-" * 60)
+            logger.info("\nSTEP 4: GENERATING PREDICTIONS")
+            logger.info("-" * 60)
             self.make_predictions()
             
             # Step 5: Generate reports
-            print("\nSTEP 5: GENERATING REPORTS AND VISUALIZATIONS")
-            print("-" * 60)
+            logger.info("\nSTEP 5: GENERATING REPORTS AND VISUALIZATIONS")
+            logger.info("-" * 60)
             self.generate_reports()
             
             # Step 6: Alert on high-risk countries
-            print("\nSTEP 6: HIGH-RISK COUNTRY ALERTS")
-            print("-" * 60)
+            logger.info("\nSTEP 6: HIGH-RISK COUNTRY ALERTS")
+            logger.info("-" * 60)
             self.generate_alerts()
             
-            print("\n" + "="*80)
-            print("PIPELINE COMPLETED SUCCESSFULLY!")
-            print(f"All results saved to: {self.results_dir}/")
-            print("="*80)
+            logger.info("\n" + "="*80)
+            logger.info("PIPELINE COMPLETED SUCCESSFULLY!")
+            logger.info(f"All results saved to: {self.results_dir}/")
+            logger.info("="*80)
             
         except Exception as e:
-            print(f"\nERROR: Pipeline failed - {e}")
+            logger.error(f"\nERROR: Pipeline failed - {e}")
             raise
     
     def load_data(self):
         """Automatically load data from internet sources"""
         # Initialize data loader
-        self.data_loader = WarDataLoader(start_year=2000, end_year=2023)
+        self.data_loader = WarDataLoader(start_year=2000, end_year=2023, random_state=42)
         
         # Load all data
         self.data = self.data_loader.load_all_data()
@@ -115,7 +122,7 @@ class AutomaticWarPredictionSystem:
         # Save raw data
         data_file = os.path.join(self.results_dir, 'raw_data.csv')
         self.data.to_csv(data_file, index=False)
-        print(f"Raw data saved to: {data_file}")
+        logger.info(f"Raw data saved to: {data_file}")
         
         # Generate data quality report
         self.generate_data_quality_report()
@@ -147,7 +154,7 @@ class AutomaticWarPredictionSystem:
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
         
-        print(f"Data quality report saved to: {report_file}")
+        logger.info(f"Data quality report saved to: {report_file}")
     
     def process_data(self):
         """Process and engineer features"""
@@ -160,7 +167,7 @@ class AutomaticWarPredictionSystem:
         # Save processed data
         processed_file = os.path.join(self.results_dir, 'processed_data.csv')
         self.processed_data.to_csv(processed_file, index=False)
-        print(f"Processed data saved to: {processed_file}")
+        logger.info(f"Processed data saved to: {processed_file}")
         
         # Generate feature statistics
         self.generate_feature_report()
@@ -194,7 +201,7 @@ class AutomaticWarPredictionSystem:
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
         
-        print(f"Feature report saved to: {report_file}")
+        logger.info(f"Feature report saved to: {report_file}")
     
     def train_models(self):
         """Train prediction models"""
@@ -223,7 +230,7 @@ class AutomaticWarPredictionSystem:
         with open(perf_file, 'w') as f:
             json.dump(performance, f, indent=2)
         
-        print(f"Model performance saved to: {perf_file}")
+        logger.info(f"Model performance saved to: {perf_file}")
     
     def make_predictions(self):
         """Generate predictions for all countries"""
@@ -262,7 +269,7 @@ class AutomaticWarPredictionSystem:
         # Save predictions
         pred_file = os.path.join(self.results_dir, 'predictions.csv')
         self.predictions.to_csv(pred_file, index=False)
-        print(f"Predictions saved to: {pred_file}")
+        logger.info(f"Predictions saved to: {pred_file}")
     
     def generate_reports(self):
         """Generate comprehensive reports and visualizations"""
@@ -301,7 +308,7 @@ class AutomaticWarPredictionSystem:
         with open(summary_file, 'w') as f:
             json.dump(summary, f, indent=2)
         
-        print(f"Executive summary saved to: {summary_file}")
+        logger.info(f"Executive summary saved to: {summary_file}")
     
     def create_risk_dashboard(self):
         """Create visual risk dashboard"""
@@ -352,7 +359,7 @@ class AutomaticWarPredictionSystem:
         plt.savefig(dashboard_file, dpi=300, bbox_inches='tight')
         plt.close()
         
-        print(f"Risk dashboard saved to: {dashboard_file}")
+        logger.info(f"Risk dashboard saved to: {dashboard_file}")
     
     def create_detailed_analysis(self):
         """Create detailed analysis plots"""
@@ -406,7 +413,7 @@ class AutomaticWarPredictionSystem:
         plt.savefig(analysis_file, dpi=300, bbox_inches='tight')
         plt.close()
         
-        print(f"Detailed analysis saved to: {analysis_file}")
+        logger.info(f"Detailed analysis saved to: {analysis_file}")
     
     def create_time_series_analysis(self):
         """Create time series analysis"""
@@ -450,25 +457,25 @@ class AutomaticWarPredictionSystem:
         plt.savefig(timeseries_file, dpi=300, bbox_inches='tight')
         plt.close()
         
-        print(f"Time series analysis saved to: {timeseries_file}")
+        logger.info(f"Time series analysis saved to: {timeseries_file}")
     
     def generate_alerts(self):
         """Generate alerts for high-risk countries"""
         high_risk = self.predictions[self.predictions['risk_level'] == 'HIGH']
         
         if len(high_risk) > 0:
-            print("\n" + "="*60)
-            print("⚠️  HIGH RISK ALERTS ⚠️")
-            print("="*60)
+            logger.info("\n" + "="*60)
+            logger.info("⚠️  HIGH RISK ALERTS ⚠️")
+            logger.info("="*60)
             
             for _, country in high_risk.iterrows():
-                print(f"\n🚨 {country['country']}:")
-                print(f"   - War Probability: {country['war_probability']:.1%}")
-                print(f"   - Risk Factors:")
-                print(f"     • Inequality (Gini): {country['gini']:.3f}")
-                print(f"     • Unemployment: {country['unemployment']:.1f}%")
-                print(f"     • Trade Connectivity: {country['trade_connectivity']:.3f}")
-                print(f"     • Geopolitical Tension: {country['geopolitical_tension']:.2f}")
+                logger.info(f"\n🚨 {country['country']}:")
+                logger.info(f"   - War Probability: {country['war_probability']:.1%}")
+                logger.info("   - Risk Factors:")
+                logger.info(f"     • Inequality (Gini): {country['gini']:.3f}")
+                logger.info(f"     • Unemployment: {country['unemployment']:.1f}%")
+                logger.info(f"     • Trade Connectivity: {country['trade_connectivity']:.3f}")
+                logger.info(f"     • Geopolitical Tension: {country['geopolitical_tension']:.2f}")
             
             # Save alerts to file
             alerts_file = os.path.join(self.results_dir, 'high_risk_alerts.json')
@@ -476,36 +483,43 @@ class AutomaticWarPredictionSystem:
             with open(alerts_file, 'w') as f:
                 json.dump(alerts_data, f, indent=2)
             
-            print(f"\nAlerts saved to: {alerts_file}")
+            logger.info(f"\nAlerts saved to: {alerts_file}")
         else:
-            print("\n✅ No high-risk countries detected.")
+            logger.info("\n✅ No high-risk countries detected.")
     
-    def run_continuous_monitoring(self, interval_hours: int = 24):
+    def run_continuous_monitoring(self, interval_hours: int = 24, max_runs: int | None = None):
         """
         Run continuous monitoring - checks for new data periodically
-        
+
         Args:
             interval_hours: Hours between checks
+            max_runs: If provided, stops after this many iterations
         """
-        print(f"\nStarting continuous monitoring (checking every {interval_hours} hours)")
-        print("Press Ctrl+C to stop")
+        logger.info(f"\nStarting continuous monitoring (checking every {interval_hours} hours)")
+        logger.info("Press Ctrl+C to stop")
         
+        run_count = 0
         while True:
             try:
                 # Run the pipeline
                 self.run_complete_pipeline()
-                
+
                 # Wait for next check
                 next_run = datetime.now() + timedelta(hours=interval_hours)
-                print(f"\nNext check scheduled for: {next_run}")
+                logger.info(f"\nNext check scheduled for: {next_run}")
                 time.sleep(interval_hours * 3600)
+
+                run_count += 1
+                if max_runs is not None and run_count >= max_runs:
+                    logger.info("Maximum monitoring runs reached. Stopping.")
+                    break
                 
             except KeyboardInterrupt:
-                print("\nMonitoring stopped by user.")
+                logger.info("\nMonitoring stopped by user.")
                 break
             except Exception as e:
-                print(f"Error in monitoring: {e}")
-                print("Retrying in 1 hour...")
+                logger.error(f"Error in monitoring: {e}")
+                logger.info("Retrying in 1 hour...")
                 time.sleep(3600)
 
 
