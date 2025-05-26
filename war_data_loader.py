@@ -1,8 +1,8 @@
 """
 war_data_loader.py
 
-Automatic data loader for war prediction model
-Fetches real-world data from multiple sources
+Automatic data loader for war prediction model. When external data sources are
+unavailable, realistic synthetic data is generated using historical patterns.
 """
 
 import pandas as pd
@@ -12,7 +12,11 @@ from datetime import datetime
 import time
 from typing import Dict, List, Optional, Tuple
 import warnings
+import logging
 warnings.filterwarnings('ignore')
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class WarDataLoader:
@@ -20,7 +24,7 @@ class WarDataLoader:
     Automatically loads war-related data from various internet sources
     """
     
-    def __init__(self, start_year: int = 2000, end_year: int = 2023):
+    def __init__(self, start_year: int = 2000, end_year: int = 2023, random_state: int = 42):
         """
         Initialize the data loader
         
@@ -30,6 +34,8 @@ class WarDataLoader:
         """
         self.start_year = start_year
         self.end_year = end_year
+        self.random_state = random_state
+        np.random.seed(self.random_state)
         self.countries = []
         self.data_cache = {}
         
@@ -54,7 +60,7 @@ class WarDataLoader:
             }
         }
         
-        print(f"Initialized WarDataLoader for years {start_year}-{end_year}")
+        logger.info(f"Initialized WarDataLoader for years {start_year}-{end_year}")
     
     def fetch_world_bank_data(self, indicator: str, countries: List[str] = None) -> pd.DataFrame:
         """
@@ -100,7 +106,7 @@ class WarDataLoader:
                 time.sleep(0.5)
                 
             except Exception as e:
-                print(f"Error fetching {indicator} for {country}: {e}")
+                logger.warning(f"Error fetching {indicator} for {country}: {e}")
         
         if all_data:
             return pd.DataFrame(all_data)
@@ -263,11 +269,12 @@ class WarDataLoader:
         Returns:
             Complete dataset for war prediction
         """
-        print("Starting automatic data collection...")
-        print("=" * 60)
+        logger.info("Starting automatic data collection...")
+        np.random.seed(self.random_state)
+        logger.info("=" * 60)
         
         # 1. Load economic indicators
-        print("\n1. Fetching economic indicators from World Bank...")
+        logger.info("\n1. Fetching economic indicators from World Bank...")
         
         # Get list of countries
         countries = ['USA', 'CHN', 'RUS', 'IND', 'GBR', 'FRA', 'DEU', 'JPN', 'BRA', 'ZAF',
@@ -278,7 +285,7 @@ class WarDataLoader:
         dfs = {}
         
         # Due to API limitations, we'll generate realistic synthetic data based on known patterns
-        print("Generating data based on historical patterns...")
+        logger.info("Generating data based on historical patterns...")
         
         # Generate base data
         data = []
@@ -328,20 +335,20 @@ class WarDataLoader:
                 })
         
         economic_df = pd.DataFrame(data)
-        print(f"Generated economic data: {len(economic_df)} records")
+        logger.info(f"Generated economic data: {len(economic_df)} records")
         
         # 2. Load conflict data
-        print("\n2. Loading conflict data...")
+        logger.info("\n2. Loading conflict data...")
         conflict_df = self.fetch_conflict_data()
-        print(f"Loaded conflict data: {len(conflict_df)} records")
+        logger.info(f"Loaded conflict data: {len(conflict_df)} records")
         
         # 3. Calculate geopolitical tension
-        print("\n3. Calculating geopolitical tension index...")
+        logger.info("\n3. Calculating geopolitical tension index...")
         tension_df = self.calculate_geopolitical_tension(economic_df)
-        print(f"Calculated tension data: {len(tension_df)} records")
+        logger.info(f"Calculated tension data: {len(tension_df)} records")
         
         # 4. Merge all data
-        print("\n4. Merging all datasets...")
+        logger.info("\n4. Merging all datasets...")
         
         # Start with economic data
         final_df = economic_df.copy()
@@ -372,10 +379,10 @@ class WarDataLoader:
             'intensity': 'war_intensity'
         }, inplace=True)
         
-        print(f"\nFinal dataset: {len(final_df)} records")
-        print(f"Countries: {final_df['country'].nunique()}")
-        print(f"Years: {final_df['year'].min()} - {final_df['year'].max()}")
-        print(f"War rate: {final_df['war_occurrence'].mean():.1%}")
+        logger.info(f"\nFinal dataset: {len(final_df)} records")
+        logger.info(f"Countries: {final_df['country'].nunique()}")
+        logger.info(f"Years: {final_df['year'].min()} - {final_df['year'].max()}")
+        logger.info(f"War rate: {final_df['war_occurrence'].mean():.1%}")
         
         # Save cache
         self.data_cache['full_data'] = final_df
@@ -409,27 +416,26 @@ class WarDataLoader:
         """Save loaded data to file"""
         if 'full_data' in self.data_cache:
             self.data_cache['full_data'].to_csv(filename, index=False)
-            print(f"Data saved to {filename}")
+            logger.info(f"Data saved to {filename}")
         else:
-            print("No data to save. Run load_all_data() first.")
+            logger.info("No data to save. Run load_all_data() first.")
 
 
 # Example usage
 if __name__ == "__main__":
     # Create data loader
     loader = WarDataLoader(start_year=2000, end_year=2023)
-    
+
     # Load all data automatically
     df = loader.load_all_data()
-    
+
     # Display sample
-    print("\nSample data:")
-    print(df.head(10))
-    
+    logger.info("\nSample data:")
+    logger.info(df.head(10))
+
     # Get latest data
     latest = loader.get_latest_data()
-    print("\nLatest data by country:")
-    print(latest[['country', 'year', 'gini', 'unemployment', 'geopolitical_tension', 'war_occurrence']])
-    
-    # Save data
+    logger.info("\nLatest data by country:")
+    logger.info(latest[['country', 'year', 'gini', 'unemployment', 'geopolitical_tension', 'war_occurrence']])
+
     loader.save_data()
